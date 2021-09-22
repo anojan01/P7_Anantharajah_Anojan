@@ -1,4 +1,4 @@
-# streamlit run C:/Users/anoja/PycharmProjects/Projet_7/main.py
+# streamlit run C:/Users/anoja/PycharmProjects/Projet_7/dashboard.py
 
 import base64
 import streamlit as st
@@ -136,9 +136,9 @@ st.write(X_new)
 # Affichage des interprétations sur le nouveau client via Shap
 
 # Initialisation Shap
+
 shap.initjs()
 st.set_option('deprecation.showPyplotGlobalUse', False)
-
 model.fit(X[X.columns[:-1]], y)
 exp = shap.Explainer(model, X)
 val = exp.shap_values(X)
@@ -153,7 +153,7 @@ st.pyplot()
 
 st.subheader("Shap Individual")
 
-iter = st.number_input("Nombre d'individus à comparer",0,X.shape[0]-1)
+iter = st.number_input("Nombre d'individus à comparer",0,X.shape[0]-1,2)
 index_list = []
 
 for i in range(0,iter) :
@@ -170,6 +170,7 @@ for i in range(0,len(index_list)) :
 
 st.subheader("Téléchargement du fichier modifié")
 st.markdown(filedownload(X), unsafe_allow_html=True)
+
 
 
 
