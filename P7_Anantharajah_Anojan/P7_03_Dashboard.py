@@ -19,9 +19,9 @@ def st_shap(plot, height=None):
 
 # Import données & Modèle
 
-X = pd.read_csv("X_train.csv")
+X = pd.read_csv("data\X_train.csv")
 X = X[X.columns[1:]]
-y = pd.read_csv("y_train.csv")
+y = pd.read_csv("data\y_train.csv")
 y = y[y.columns[1:]]
 y = pd.DataFrame(y)
 
