@@ -10,6 +10,7 @@ import shap
 from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 import japanize_matplotlib
+import plotly.express as px
 
 
 def st_shap(plot, height=None):
@@ -93,19 +94,24 @@ def filedownload(df):
 
 # AFFICHAGE APPLICATION
 
+
+
 # Affichage Accueil de l'application
 
 img = "https://www.compareil.fr/public/medias/credit-scoring.jpeg"
 st.image(img)
 
-
 st.write("# Application permettant de prédire l'accord à un prêt bancaire")
+
+
 
 # Affichage des données d'entrées
 
 input_df = client_carac()
 st.subheader("Synthèse Client")
 st.write(input_df)
+
+
 
 # Affichage de la prévision
 
@@ -116,60 +122,99 @@ st.subheader("Resultat de la prévision")
 st.write(pd.DataFrame({"Probabilité d'être en défaut (Défault si >= 70%)": prevision}))
 
 if prevision >= 70:
-    st.write("Client en défault")
+    st.subheader("Client en défault")
     y = y.append(pd.DataFrame({y.columns[0]: [1]},index=[y.shape[0]]))
 else:
-    st.write("Client conforme")
+    st.subheader("Client conforme")
     y = y.append(pd.DataFrame({y.columns[0]: [0]},index=[y.shape[0]]))
+
+
 
 # Ajout du client
 
 X = pd.concat([X, input_df])
 X_new = X
 
-
 st.subheader("Synthèse globale des clients")
 X_new["TARGET"] = y
 st.write(X_new)
 
 
-# Affichage des interprétations sur le nouveau client via Shap
+
+# Filtrage
+
+st.subheader("Filtrage")
+
+iter_lig = st.number_input("Nombre de lignes à afficher", 0, X.shape[0]-1, 2)
+
+iter_col = st.number_input("Nombre de colonnes à afficher", 0, X.shape[1], 2)
+col_list = []
+
+for i in range(0, iter_col):
+    index = st.selectbox("Colonne numéro {}".format(i + 1),X_new.columns,i)
+    col_list.append(index)
+
+X_filtre = X_new[col_list].iloc[:iter_lig,:]
+st.write(X_filtre)
+
+st.subheader("Téléchargement du fichier filtré")
+st.markdown(filedownload(X_filtre), unsafe_allow_html=True)
+
+# Affichage graphique
+
+st.subheader("Graphiques")
+
+for col in col_list:
+    fig = px.scatter(
+        x=X_new[col]
+    )
+    fig.update_layout(
+        xaxis_title=col
+    )
+    st.write(fig)
+
+
+
+# Affichage des interprétations via Shap
+
+# Récupération du nombre de clients à afficher
+
+st.subheader("Analyse Shap")
+
+iter = st.number_input("Nombre d'individus à comparer", 0, X.shape[0] - 1, 2)
+
+index_list = []
+
+for i in range(0, iter):
+    index = st.selectbox("Index Individu numéro {}".format(i + 1), range(0, X.shape[0]), i)
+    index_list.append(index)
+
 
 # Initialisation Shap
 
-shap.initjs()
-st.set_option('deprecation.showPyplotGlobalUse', False)
-model.fit(X[X.columns[:-1]], y)
-exp = shap.Explainer(model, X)
-val = exp.shap_values(X)
+if st.button("Lancer l'analyse Shap (ETA : 1 min)") :
 
-# Shap Summary
+    shap.initjs()
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    model.fit(X[X.columns[:-1]], y)
+    exp = shap.Explainer(model, X)
+    val = exp.shap_values(X)
 
-st.subheader("Shap Summary")
-shap.summary_plot(val, X)
-st.pyplot()
+    # Shap Summary
 
-# Shap Individual / Multi
+    st.subheader("Shap Summary")
+    shap.summary_plot(val, X)
+    st.pyplot()
 
-st.subheader("Shap Individual")
+    # Shap Individual / Multi
 
-iter = st.number_input("Nombre d'individus à comparer",0,X.shape[0]-1,2)
-index_list = []
+    st.subheader("Shap Individual")
 
-for i in range(0,iter) :
-
-    index = st.selectbox("Index numéro {}".format(i+1),range(0,X.shape[0]),i)
-    index_list.append(index)
-
-for i in range(0,len(index_list)) :
-    st.write("Interpretation Shap à l'index:",index_list[i],"- Prédiction :",X_new["TARGET"][index_list[i]])
-    st_shap(shap.force_plot(exp.expected_value, val[index_list[i],:], X.iloc[index_list[i],:]))
+    for i in range(0,len(index_list)) :
+        st.write("Interpretation Shap à l'index:",index_list[i],"- Prédiction :",X_new["TARGET"][index_list[i]])
+        st_shap(shap.force_plot(exp.expected_value, val[index_list[i],:], X.iloc[index_list[i],:]))
 
 
-# Téléchargement nouveau fichier
-
-st.subheader("Téléchargement du fichier modifié")
-st.markdown(filedownload(X), unsafe_allow_html=True)
 
 
 
