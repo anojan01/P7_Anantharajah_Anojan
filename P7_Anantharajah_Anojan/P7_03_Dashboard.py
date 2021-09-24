@@ -1,4 +1,4 @@
-# streamlit run C:/Users/anoja/PycharmProjects/Projet_7/dashboard.py
+# streamlit run D:/OC/Projet_7/Livrables/P7_Anantharajah_Anojan/P7_03_Dashboard.py
 
 import base64
 import streamlit as st
@@ -19,9 +19,9 @@ def st_shap(plot, height=None):
 
 # Import données & Modèle
 
-X = pd.read_csv("data\X_train.csv")
+X = pd.read_csv("data/X_train.csv")
 X = X[X.columns[1:]]
-y = pd.read_csv("data\y_train.csv")
+y = pd.read_csv("data/y_train.csv")
 y = y[y.columns[1:]]
 y = pd.DataFrame(y)
 
