@@ -20,6 +20,7 @@ def st_shap(plot, height=None):
 # Import données & Modèle
 
 X = pd.read_csv("data/X_train.csv")
+X = X.head(500)
 X = X[X.columns[1:]]
 y = pd.read_csv("data/y_train.csv")
 y = y[y.columns[1:]]
@@ -192,11 +193,10 @@ for i in range(0, iter):
 
 # Initialisation Shap
 
-if st.button("Lancer l'analyse Shap (ETA : 1 min)") :
+if st.button("Lancer l'analyse Shap") :
 
     shap.initjs()
     st.set_option('deprecation.showPyplotGlobalUse', False)
-    model.fit(X[X.columns[:-1]], y)
     exp = shap.Explainer(model, X)
     val = exp.shap_values(X)
 
